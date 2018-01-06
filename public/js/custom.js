@@ -5,34 +5,145 @@ $(document).ready(function(){
 	const DEFAULT_RED = $('#btn_red').css('background-color');
 	const DEFAULT_YELLOW = $('#btn_yellow').css('background-color');
 	const DEFAULT_BLUE = $('#btn_blue').css('background-color');
+	const DEFAULT_START = $('#start').css('background-color');
+	const DEFAULT_STRICT_LIGHT = $('#strictLight').css('background-color');
 	const ACTIVE_GREEN = 'rgb(0, 255, 0)';
 	const ACTIVE_RED = 'rgb(255, 0, 0)';
 	const ACTIVE_YELLOW = 'rgb(255, 255, 0)';
 	const ACTIVE_BLUE = 'rgb(0, 0, 255)';
+	const ACTIVE_START = 'rgb(0, 255, 0)';
+	const ACTIVE_STRICT_LIGHT = 'rgb(255, 0, 0)';
 	const MAX_COMBO_LENGTH = 20;
-	var computersTurn = true;
+	const ERROR = '!!';
+	const WIN = 'WIN';
+	const GAME_SPEED = 1000; // milliseconds
+	const DISPLAY_ERROR = 1500; // milliseconds
+	var computersTurn = false;
 	var strict = false;
 	var audio_green, audio_red, audio_blue, audio_yellow;
 	var winningCombo = [];
-	var currWinnComboIndex = 19;
-	var gameOn = false;
-	var gameSpeed = 1000; // milliseconds
-	var showWinningCombo = setInterval(ShowCurrentWinningCombo, gameSpeed);
+	var currWinnComboIndex = 0;
+	var gameOn = true;
+	var gameStarted = false;
+	var gameWon = false;
+	
+	var showWinningCombo = setInterval(ShowCurrentWinningCombo, GAME_SPEED);
 	var iteration = 0;
+	var currentCount = 0;
 	
 	DefineAudio();
 	PopulateWinningCombo();
 	
-	// Chains mousedown, mouseup and mouseleave events for the four buttons
+	
+	// Chains mousedown and mouseup events for the four buttons
 	$('#btn_green, #btn_red, #btn_yellow, #btn_blue').on('mousedown', function(){
 		if (computersTurn) { return; }
+		if (!gameStarted) { return; }
 		var id = $(this).attr('id');
 		ActivateButton(id);
-	
-	}).on('mouseup mouseleave', function(){
+		
+	}).on('mouseup', function(){
 		if (computersTurn) { return; }
 		var id = $(this).attr('id');
 		DeactivateButton(id);
+			
+		if (winningCombo[iteration] === id){ // correct move
+			if (iteration == MAX_COMBO_LENGTH - 1){ // winner
+				alert('got here');
+				Update_CountDisplay(WIN);
+				gameWon = true;
+				
+				setTimeout(function(){ 
+					ResetGame();
+					RestartGame();
+				}, 1500);
+				
+			} else { // more moves to be played
+				if (iteration === currWinnComboIndex){ // now computer's turn to show next sequence
+					setTimeout(function(){ 
+						iteration = 0;
+						currWinnComboIndex++;
+						computersTurn = true;
+					}, 1500);
+
+				} else {
+					iteration++;
+				}
+			}
+			
+			
+		} else{ // wrong move
+			
+			if (strict){ // start all over
+				Update_CountDisplay(ERROR);
+				
+				setTimeout(function(){ 
+					ResetGame();
+					RestartGame();
+				}, DISPLAY_ERROR);
+
+			} else { // repeat sequence
+				
+				currentCount--;
+				Update_CountDisplay(ERROR);
+				
+				setTimeout(function(){ 
+					computersTurn = true;
+					iteration = 0;
+				}, DISPLAY_ERROR);
+				
+			}
+		}
+	});
+	
+	// Chains mousedown, mouseup and mouseleave events for the start button
+	$('#start').on('mousedown', function(){
+		if (!gameOn) { return; }
+		if (gameStarted) { return; }
+		RestartGame();
+		
+		$(this).css('background-color', ACTIVE_START);
+		
+	}).on('mouseup mouseleave', function(){
+		$(this).css('background-color', DEFAULT_START);
+	});
+	
+	$('#btn_strict').on('mousedown', function(){
+		if (strict){
+			$('#strictLight').css('background-color', DEFAULT_STRICT_LIGHT);
+		
+		} else {
+			$('#strictLight').css('background-color', ACTIVE_STRICT_LIGHT);
+		}
+		
+		strict = !strict;
+	});
+	
+	$('#toggle-onOff').on('change', function(){
+		var on = $(this).prop('checked');
+		
+		if (on) {
+			ResetGame();
+		
+		} else {
+			$('#count').text( '' );
+			gameStarted = false;
+		}
+		
+		gameOn = on;
+	});
+	
+	
+	$(function() {
+		// Initializes bootstrap toggle object
+		$('#toggle-onOff').bootstrapToggle({
+			size: 'small',
+			onstyle: 'success',
+			offstyle: 'danger'
+		});
+		
+		$('#toggle-onOff').bootstrapToggle('on'); // defaults to on
+		Update_CountDisplay(currentCount);
 	});
 	
 	// Creates an audio html5 element and assigns the associated file to the audio variables
@@ -61,20 +172,28 @@ $(document).ready(function(){
 			winner = BUTTON_IDs[index];
 			winningCombo.push(winner);
 		}
-		console.log(winningCombo);
 	};
 	
 	function ShowCurrentWinningCombo(){
 		if (!computersTurn) { return; }
-		if (iteration > 0) { DeactivateButton(winningCombo[iteration - 1]); } // Deactivate previous iteration
+		if (!gameStarted) { return; }
+		//if (iteration > 0) { DeactivateButton(winningCombo[iteration - 1]); } // Deactivate previous iteration
 		
 		if (iteration <= currWinnComboIndex){
 			ActivateButton(winningCombo[iteration]);
 			iteration++;
-		
+			Update_CountDisplay(currentCount);
+			
+			if (iteration > 0) {
+				setTimeout(function(){ 
+					DeactivateButton(winningCombo[iteration - 1]);
+				}, GAME_SPEED / 2);
+			}
+			
 		} else {
 			computersTurn = false;
 			iteration = 0;
+			currentCount++;
 		}
 	};
 	
@@ -134,6 +253,35 @@ $(document).ready(function(){
 			default:
 				return;
 		}
+	};
+	
+	function Update_CountDisplay(display){
+		if (typeof display == 'number'){
+			if (display > 9) {
+				$('#count').text( display.toString() );
+			} else {
+				$('#count').text( '0' + display.toString() );
+			}
+		} else {
+			$('#count').text( display );
+		}			 
+	};
+	
+	function ResetGame(){
+		// Reset all variables
+		iteration = 0;
+		currentCount = 0;
+		computersTurn = false;
+		PopulateWinningCombo(); // repopulates winning combo
+		currWinnComboIndex = 0;
+		Update_CountDisplay(currentCount);
+	};
+	
+	function RestartGame(){
+		gameStarted = true;
+		computersTurn = true;
+		currentCount = 1;
+		Update_CountDisplay(currentCount);
 	};
 	
 });

@@ -3,9 +3,8 @@
     src: url(../font/digital-7.ttf);
 }
 
-
 body {
-		background-image: url("../img/congruent_outline.png");
+	background-image: url("../img/congruent_outline.png");
 }
 
 .buttons {
@@ -108,9 +107,75 @@ body {
 	color: black;
 }
 
+#count {
+	margin-left: 1.1em;
+	height: 40px;
+	background-color: rgb(50, 0, 0);
+	border-radius: 0.5em;
+	border-style: solid;
+	border-color: black;
+	border-width: 2px;
+	font-size: 1.9em;
+	color: red;
+	font-family: digital;
+	text-align: middle;
+}
 
+#start {
+	margin-top: 0.25em;
+	margin-left: 1.5em;
+	width: 32px;
+	height: 32px;
+	border-radius: 100%;
+	border-style: solid;
+	border-color: black;
+	border-width: 2px;
+	background-color: red;
+	
+	-moz-box-shadow: inset -5px -5px 5px rgba(255, 255, 255, .4);
+    -webkit-box-shadow: inset -5px -5px 5px rgba(255, 255, 255, .4);
+    box-shadow: inset -5px -5px 5px rgba(255, 255, 255, .4);
+}
 
+#btn_strict {
+	margin-top: 0.25em;
+	margin-left: 1.8em;
+	width: 32px;
+	height: 32px;
+	border-radius: 100%;
+	border-style: solid;
+	border-color: black;
+	border-width: 2px;
+	background-color: yellow;
+	
+	-moz-box-shadow: inset -5px -5px 5px rgba(255, 255, 255, .4);
+    -webkit-box-shadow: inset -5px -5px 5px rgba(255, 255, 255, .4);
+    box-shadow: inset -5px -5px 5px rgba(255, 255, 255, .4);
+}
 
+#strictLight {
+	margin-top: -0.5em;
+	margin-left: 1.25em;
+	width: 12px;
+	height: 12px;
+	border-radius: 100%;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	background-color: rgb(50, 0, 0);
+	
+	-moz-box-shadow: inset -1px -1px 1px rgba(255, 255, 255, .4);
+    -webkit-box-shadow: inset -1px -1px 1px rgba(255, 255, 255, .4);
+    box-shadow: inset -1px -1px 1px rgba(255, 255, 255, .4);
+}
+
+#lbl_start {
+	margin-left: 0.5em;
+}
+
+#lbl_strict {
+	margin-left: 0.25em;
+}
 
 
 /*==========  Mobile First Method  ==========*/
